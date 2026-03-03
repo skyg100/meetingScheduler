@@ -6,19 +6,36 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
 
-// Firebase Setup (외부 환경 변수 연동)
+// ==========================================
+// ⭐ 중요: 여기에 본인의 Firebase 설정값을 넣으세요! ⭐
+// (Firebase 콘솔에서 복사한 내용을 아래 내용 대신 붙여넣어 주세요)
+// ==========================================
+const myFirebaseConfig = {
+  apiKey: "여기에_API_KEY_입력",
+  authDomain: "여기에_AUTH_DOMAIN_입력",
+  projectId: "여기에_PROJECT_ID_입력",
+  storageBucket: "여기에_STORAGE_BUCKET_입력",
+  messagingSenderId: "여기에_MESSAGING_SENDER_ID_입력",
+  appId: "여기에_APP_ID_입력"
+};
+
+// Firebase Setup
 let app, auth, db;
 try {
-  const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-  if (firebaseConfig) {
-    app = initializeApp(firebaseConfig);
+  // AI 테스트 화면(Canvas)일 경우 기본 제공 DB를 쓰고, Vercel(실제 배포)일 경우 위 myFirebaseConfig를 사용합니다.
+  const isCanvas = typeof __firebase_config !== 'undefined';
+  const configToUse = isCanvas ? JSON.parse(__firebase_config) : myFirebaseConfig;
+  
+  if (configToUse && configToUse.apiKey !== "여기에_API_KEY_입력") {
+    app = initializeApp(configToUse);
     auth = getAuth(app);
     db = getFirestore(app);
   }
 } catch (error) {
   console.error('Firebase init failed:', error);
 }
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'my-meeting-app';
 
 const timeOptions = Array.from({ length: 48 }, (_, i) => {
   const hour = Math.floor(i / 2).toString().padStart(2, '0');
@@ -58,6 +75,15 @@ export default function App() {
   const [adminPwdInput, setAdminPwdInput] = useState('');
   const [adminAuthError, setAdminAuthError] = useState('');
   const [confirmReset, setConfirmReset] = useState(false);
+
+  // Vercel 배포 시, Firebase 설정을 안 했을 경우 경고 알림 띄우기
+  useEffect(() => {
+    if (!db && typeof __firebase_config === 'undefined') {
+      setTimeout(() => {
+        setErrorMessage('⚠️ Firebase 데이터베이스 연결이 필요합니다. App.jsx 상단의 myFirebaseConfig를 설정해주세요!');
+      }, 1000);
+    }
+  }, []);
 
   // 1. Firebase Authentication 초기화
   useEffect(() => {
@@ -162,12 +188,19 @@ export default function App() {
   // Error Message Helper
   const showError = (msg) => {
     setErrorMessage(msg);
-    setTimeout(() => setErrorMessage(''), 3000);
+    setTimeout(() => setErrorMessage(''), 4000);
   };
 
   // CREATE MEETING HANDLER (Firestore에 저장)
   const handleCreateMeeting = async (e) => {
     e.preventDefault();
+
+    // 데이터베이스 연결 확인 방어 로직 추가
+    if (!db) {
+      showError('Firebase가 아직 연결되지 않았습니다. VS Code로 돌아가 App.jsx에 있는 myFirebaseConfig 설정을 먼저 완료해주세요.');
+      return;
+    }
+
     const form = e.target;
     const title = form.title.value;
     const startDate = form.startDate.value;
@@ -330,7 +363,7 @@ export default function App() {
   const renderErrorToast = () => {
     if (!errorMessage) return null;
     return (
-      <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-xl shadow-2xl z-50 flex items-center gap-2 fade-in font-semibold">
+      <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-xl shadow-2xl z-50 flex items-center gap-2 fade-in font-semibold max-w-lg w-full text-center">
         <span className="text-xl">🔔</span> {errorMessage}
       </div>
     );
