@@ -109,11 +109,11 @@ export default function App() {
     };
   }, [user]);
 
-  // 공유 링크로 접속한 경우 UI 처리 (투표 전용 메인 메뉴로 이동)
+  // 공유 링크로 접속한 경우 UI 처리 (바로 소속 입력 후 투표 화면으로 이동하도록 수정)
   useEffect(() => {
     if (window.location.search.includes('shared=true')) {
       setIsSharedView(true);
-      setCurrentView('home'); // 단축 링크 접속 시 2개의 메뉴바(체크하기, 현재상황)만 보이는 메인으로 연결
+      setCurrentView('login'); // 단축 링크 접속 시 바로 투표를 위한 로그인 화면으로 연결
     }
   }, []);
 
@@ -388,7 +388,7 @@ export default function App() {
       <h2 className="text-2xl font-bold text-gray-800 mb-4">🎉 설정된 조사 일정에 맞춰 조사 링크가 생성되었습니다!</h2>
       <p className="text-gray-600 mb-8 leading-relaxed">
         아래 단축 링크를 복사하여 참석자들에게 전달해주세요.<br/>
-        해당 링크로 접속하면 <strong>'회의 가능 여부 체크하기'</strong>와 <strong>'현재체크상황'</strong> 메뉴만 활성화됩니다.
+        해당 링크로 접속하면 <strong>'소속 입력'</strong> 화면을 거쳐 바로 <strong>'일정 투표'</strong> 화면으로 이동합니다.
       </p>
 
       <div className="flex w-full gap-2 mb-10">
@@ -669,9 +669,11 @@ export default function App() {
   const renderLogin = () => (
     <div className="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-sm border border-gray-100 mt-16 fade-in">
       <div className="flex items-center mb-6">
-        <button onClick={() => setCurrentView('home')} className="mr-4 text-gray-400 hover:text-gray-700">
-          <ArrowLeft className="w-6 h-6" />
-        </button>
+        {!isSharedView && (
+            <button onClick={() => setCurrentView('home')} className="mr-4 text-gray-400 hover:text-gray-700">
+            <ArrowLeft className="w-6 h-6" />
+            </button>
+        )}
         <h2 className="text-2xl font-bold text-gray-800">소속 입력</h2>
       </div>
       <p className="text-gray-600 mb-6 text-sm">
@@ -734,9 +736,11 @@ export default function App() {
         <div className="bg-gray-50 p-6 border-b flex justify-between items-center">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <button onClick={() => setCurrentView('home')} className="text-gray-400 hover:text-gray-700">
-                <ArrowLeft className="w-5 h-5" />
-              </button>
+              {!isSharedView && (
+                  <button onClick={() => setCurrentView('home')} className="text-gray-400 hover:text-gray-700">
+                    <ArrowLeft className="w-5 h-5" />
+                  </button>
+              )}
               <h2 className="text-2xl font-bold text-gray-800">{meetingConfig.title}</h2>
             </div>
             <p className="text-sm text-gray-500 ml-7">
@@ -862,9 +866,11 @@ export default function App() {
       <div className="max-w-6xl mx-auto mt-6 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden fade-in">
         <div className="bg-gray-50 p-6 border-b flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <button onClick={() => setCurrentView('home')} className="text-gray-400 hover:text-gray-700">
-              <ArrowLeft className="w-5 h-5" />
-            </button>
+            {!isSharedView && (
+                <button onClick={() => setCurrentView('home')} className="text-gray-400 hover:text-gray-700">
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+            )}
             <h2 className="text-2xl font-bold text-gray-800">현재체크상황</h2>
           </div>
           <div className="text-sm text-gray-500 bg-white px-4 py-2 rounded-full border shadow-sm flex items-center gap-2 font-semibold">
@@ -934,9 +940,11 @@ export default function App() {
 
         {/* Footer Buttons */}
         <div className="p-6 bg-gray-50 border-t flex flex-col sm:flex-row justify-center gap-4">
-          <button onClick={() => setCurrentView('home')} className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-md text-lg">
-            <Home className="w-6 h-6" /> 첫화면 돌아가기
-          </button>
+          {!isSharedView && (
+              <button onClick={() => setCurrentView('home')} className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-md text-lg">
+                <Home className="w-6 h-6" /> 첫화면 돌아가기
+              </button>
+          )}
           
           {/* 종료하기 -> 관리자모드 버튼으로 변경 */}
           <button onClick={() => setShowAdminAuth(true)} className="flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-900 text-white font-bold py-4 px-8 rounded-xl shadow-md text-lg">
