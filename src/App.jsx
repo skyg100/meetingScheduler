@@ -11,12 +11,13 @@ import { getFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
 // (Firebase 콘솔에서 복사한 내용을 아래 내용 대신 붙여넣어 주세요)
 // ==========================================
 const myFirebaseConfig = {
-  apiKey: "여기에_API_KEY_입력",
-  authDomain: "여기에_AUTH_DOMAIN_입력",
-  projectId: "여기에_PROJECT_ID_입력",
-  storageBucket: "여기에_STORAGE_BUCKET_입력",
-  messagingSenderId: "여기에_MESSAGING_SENDER_ID_입력",
-  appId: "여기에_APP_ID_입력"
+  apiKey: "AIzaSyBI3LZKM572DrC-Y7YJItD1RT7cbLwUV4s",
+  authDomain: "meetingscheduler-baf8b.firebaseapp.com",
+  projectId: "meetingscheduler-baf8b",
+  storageBucket: "meetingscheduler-baf8b.firebasestorage.app",
+  messagingSenderId: "877777182091",
+  appId: "1:877777182091:web:e79466a0372a4054bc638e",
+  measurementId: "G-17G51KPYRP"
 };
 
 // Firebase Setup
