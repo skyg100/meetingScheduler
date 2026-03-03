@@ -109,10 +109,11 @@ export default function App() {
     };
   }, [user]);
 
-  // 공유 링크로 접속한 경우 UI 처리
+  // 공유 링크로 접속한 경우 UI 처리 (투표 전용 메인 메뉴로 이동)
   useEffect(() => {
     if (window.location.search.includes('shared=true')) {
       setIsSharedView(true);
+      setCurrentView('home'); // 단축 링크 접속 시 2개의 메뉴바(체크하기, 현재상황)만 보이는 메인으로 연결
     }
   }, []);
 
@@ -210,7 +211,7 @@ export default function App() {
     // 로컬 State 반영 후 Firebase 데이터베이스에 저장
     setMeetingConfig(newConfig);
     setIsPollCreated(true);
-    setCurrentView('home');
+    setCurrentView('share');
 
     if (db) {
       try {
@@ -376,6 +377,51 @@ export default function App() {
     );
   };
 
+  // RENDER: SHARE LINK VIEW (설정 완료 직후 또는 메인에서 진입)
+  const renderShareLink = () => (
+    <div className="max-w-2xl mx-auto bg-white p-10 rounded-2xl shadow-sm border border-gray-100 mt-16 fade-in text-center">
+      <div className="flex justify-center mb-6">
+        <div className="bg-blue-100 p-4 rounded-full">
+          <Link className="w-10 h-10 text-blue-600" />
+        </div>
+      </div>
+      <h2 className="text-2xl font-bold text-gray-800 mb-4">🎉 설정된 조사 일정에 맞춰 조사 링크가 생성되었습니다!</h2>
+      <p className="text-gray-600 mb-8 leading-relaxed">
+        아래 단축 링크를 복사하여 참석자들에게 전달해주세요.<br/>
+        해당 링크로 접속하면 <strong>'회의 가능 여부 체크하기'</strong>와 <strong>'현재체크상황'</strong> 메뉴만 활성화됩니다.
+      </p>
+
+      <div className="flex w-full gap-2 mb-10">
+        <div className="flex-1 flex items-center bg-gray-50 border border-gray-300 rounded-lg px-4 overflow-hidden">
+          <Link className="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" />
+          <input 
+            type="text" 
+            readOnly 
+            value={isShortening ? '단축 링크를 생성하는 중입니다...' : (shortUrl || `${window.location.origin}${window.location.pathname}?shared=true`)} 
+            className={`w-full bg-transparent p-3 text-base outline-none ${isShortening ? 'text-gray-400' : 'text-gray-700 font-medium'}`} 
+          />
+        </div>
+        <button 
+          onClick={handleCopyLink} 
+          disabled={isShortening}
+          className={`${isShortening ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'} text-white px-8 py-3 rounded-lg font-bold transition-colors flex items-center gap-2 flex-shrink-0 text-lg shadow-md`}
+        >
+          <Copy className="w-5 h-5" />
+          {isShortening ? '생성 중' : '복사하기'}
+        </button>
+      </div>
+
+      <div className="flex justify-center gap-4 border-t border-gray-100 pt-8">
+        <button 
+          onClick={() => setCurrentView('home')} 
+          className="flex items-center gap-2 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors"
+        >
+          <Home className="w-5 h-5" /> 메인 화면으로 가기
+        </button>
+      </div>
+    </div>
+  );
+
   // RENDER: HOME VIEW
   const renderHome = () => (
     <div className="flex flex-col items-center justify-center space-y-8 mt-12 fade-in">
@@ -390,21 +436,26 @@ export default function App() {
       <div className={`grid ${isSharedView ? 'md:grid-cols-2 max-w-4xl' : 'md:grid-cols-3 max-w-5xl'} gap-6 w-full px-4`}>
         {!isSharedView && (
           <button
-            onClick={() => setCurrentView('create')}
-            disabled={isPollCreated}
+            onClick={() => isPollCreated ? setCurrentView('share') : setCurrentView('create')}
             className={`flex flex-col items-center justify-center p-10 rounded-2xl border-2 transition-all duration-200 ${
               isPollCreated 
-                ? 'border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed' 
+                ? 'border-blue-500 bg-blue-50 hover:shadow-lg hover:-translate-y-1' 
                 : 'border-blue-200 bg-white hover:border-blue-500 hover:shadow-lg hover:-translate-y-1'
             }`}
           >
-            <PlusCircle className={`w-16 h-16 mb-4 ${isPollCreated ? 'text-gray-400' : 'text-blue-500'}`} />
-            <h2 className={`text-2xl font-semibold mb-2 ${isPollCreated ? 'text-gray-500' : 'text-gray-800'}`}>
-              회의 일정 조사 설정하기
-            </h2>
-            <p className="text-sm text-gray-500 text-center">
-              {isPollCreated ? '이미 일정이 생성되었습니다.' : '새로운 회의 일정을 만들고 시간을 설정합니다.'}
-            </p>
+            {isPollCreated ? (
+                <>
+                  <Link className="w-16 h-16 mb-4 text-blue-500" />
+                  <h2 className="text-2xl font-semibold mb-2 text-gray-800">조사 링크 공유하기</h2>
+                  <p className="text-sm text-gray-500 text-center">생성된 회의 일정의 공유 링크를 확인하고 복사합니다.</p>
+                </>
+            ) : (
+                <>
+                  <PlusCircle className="w-16 h-16 mb-4 text-blue-500" />
+                  <h2 className="text-2xl font-semibold mb-2 text-gray-800">회의 일정 조사 설정하기</h2>
+                  <p className="text-sm text-gray-500 text-center">새로운 회의 일정을 만들고 시간을 설정합니다.</p>
+                </>
+            )}
           </button>
         )}
 
@@ -446,34 +497,14 @@ export default function App() {
       </div>
 
       {isPollCreated && !isSharedView && (
-        <div className="mt-4 bg-white p-6 rounded-xl border border-gray-200 shadow-sm max-w-2xl w-full flex flex-col items-center fade-in">
-          <h3 className="text-lg font-bold text-gray-800 mb-2">🎉 회의 일정이 생성되었습니다!</h3>
-          <p className="text-sm text-gray-500 mb-4">아래 단축 링크를 복사하여 참석자들에게 공유하세요.</p>
-          <div className="flex w-full gap-2">
-            <div className="flex-1 flex items-center bg-gray-50 border border-gray-300 rounded-lg px-3 overflow-hidden">
-              <Link className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
-              <input 
-                type="text" 
-                readOnly 
-                value={isShortening ? '단축 링크를 생성하는 중입니다...' : (shortUrl || `${window.location.origin}${window.location.pathname}?shared=true`)} 
-                className={`w-full bg-transparent p-2 text-sm outline-none ${isShortening ? 'text-gray-400' : 'text-gray-600'}`} 
-              />
-            </div>
-            <button 
-              onClick={handleCopyLink} 
-              disabled={isShortening}
-              className={`${isShortening ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'} text-white px-6 py-2 rounded-lg font-bold transition-colors flex items-center gap-2 flex-shrink-0`}
-            >
-              <Copy className="w-4 h-4" />
-              {isShortening ? '생성 중' : '복사하기'}
-            </button>
-          </div>
+        <div className="mt-4 text-center text-sm text-gray-400">
+          💡 힌트: '조사 링크 공유하기'를 통해 참석자들에게 링크를 전달하거나 '회의 가능 여부 체크하기'를 눌러 투표를 진행하세요.
         </div>
       )}
-      
-      {isPollCreated && (
+
+      {isSharedView && (
         <div className="mt-4 text-center text-sm text-gray-400">
-          💡 힌트: '회의 가능 여부 체크하기'를 눌러 투표를 진행하세요.
+          💡 힌트: '회의 가능 여부 체크하기'를 눌러 참석 여부를 체크해주세요.
         </div>
       )}
     </div>
@@ -644,8 +675,10 @@ export default function App() {
         <h2 className="text-2xl font-bold text-gray-800">소속 입력</h2>
       </div>
       <p className="text-gray-600 mb-6 text-sm">
-        회의 일정을 체크하기 위해 본인의 소속과이름을 입력해주세요. <br/>
-        (예: KIBA지재팀홍길동)
+        {isSharedView 
+          ? '초대받은 회의 일정에 참석 여부를 체크하기 위해 소속과 이름을 입력해주세요.' 
+          : '회의 일정을 체크하기 위해 본인의 소속과 이름을 입력해주세요.'} <br/>
+        <span className="text-xs text-gray-400 mt-1 inline-block">(예: KIBA지재팀홍길동)</span>
       </p>
       <form onSubmit={(e) => {
         e.preventDefault();
@@ -665,11 +698,24 @@ export default function App() {
         />
         <button 
           type="submit" 
-          className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl transition-colors shadow-md"
+          className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl transition-colors shadow-md mb-4"
         >
           입력 완료하고 일정 체크하기
         </button>
       </form>
+
+      {/* 공유 링크로 접속한 사용자를 위한 편의 버튼 */}
+      {isSharedView && (
+        <div className="text-center mt-2 border-t pt-4">
+          <button 
+            type="button"
+            onClick={() => setCurrentView('summary')} 
+            className="text-sm text-gray-500 hover:text-indigo-600 font-medium underline transition-colors"
+          >
+            투표하지 않고 현재 체크상황만 보기
+          </button>
+        </div>
+      )}
     </div>
   );
 
@@ -1031,6 +1077,7 @@ export default function App() {
 
       {currentView === 'home' && renderHome()}
       {currentView === 'create' && renderCreate()}
+      {currentView === 'share' && renderShareLink()}
       {currentView === 'login' && renderLogin()}
       {currentView === 'vote' && renderVote()}
       {currentView === 'summary' && renderSummary()}
