@@ -1,16 +1,29 @@
-# React + Vite
+# meetingScheduler
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 개요
 
-Currently, two official plugins are available:
+본 프로젝트는 회사 내 다양한 팀 또는 외부 관계자들과의 협력 미팅 일정을 계획하거나 조율할 때, 참석자들이 다른 참석자들의 상황을 실시간으로 파악할 수 있도록 만든 도구입니다.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 목적
 
-## React Compiler
+해당 업무를 담당하는 자가 참석자들의 일정을 개별 Comm.을 통해 조율하는 수고를 줄여 업무의 효율을 높일 수 있습니다.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 기능
 
-## Expanding the ESLint configuration
+- 회의 일정, 참석자 규모, 가능한 일정 정리
+- 참석자들이 다른 참석자들의 실시간 참석 가능 예상 일정 열람 가능
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 사용방법
+
+1. 업무담당자가 회의명, 회의 가능 예상 일정, 참석자 명단을 기입하여 프로젝트 생성
+2. 참석자들에게 링크 공유 후, 참석자들이 실시간으로 자신이 참석 가능한 날짜를 체크
+3. 참석 가능 일정을 기입하는 시점에서 기 등록된 타 참석자들의 참석 가능 일정 확인 가능
+4. 전체 참석자 등록 후 전체 참석 가능 일정, 최다 참석 가능 일정 등 자동 추출
+
+## 향후 계획
+
+- 현재는 단순화된 단계이지만, 향후 동일 업무 회의 일정을 지속적으로 추적·관리할 수 있도록 할 예정
+
+## 기술 스택
+
+- React + Vite 기반으로 개발되었습니다.
